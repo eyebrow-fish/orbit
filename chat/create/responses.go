@@ -1,5 +1,7 @@
 package create
 
+import "github.com/eyebrow-fish/orbit/chat"
+
 type ChatResp struct {
-	Name string
+	Chat chat.Chat
 }
