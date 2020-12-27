@@ -10,7 +10,13 @@ import (
 
 func handle(ctx context.Context, req create.ChatReq) (*create.ChatResp, error) {
 	db := ctx.Value("db").(*sql.DB)
-	res, err := db.Exec(`insert into chat(id, name) values (0, ?)`, req.Name)
+	res, err := db.Exec(
+		`
+		insert into chat(name) 
+			values ($1)
+		`,
+		req.Name,
+	)
 	if err != nil {
 		return nil, err
 	}
