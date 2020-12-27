@@ -8,6 +8,7 @@
 | --- | --- |
 | [account](./account) | account creation and management |
 | [chat](./chat) | getting, posting, or subscribing to a chat |
+| [testutil](./testutil) | test helper functions |
 
 # terminology
 
