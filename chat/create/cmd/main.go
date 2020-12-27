@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/eyebrow-fish/orbit/chat"
 	"github.com/eyebrow-fish/orbit/chat/create"
+	"github.com/eyebrow-fish/orbit/store"
 )
 
 func handle(ctx context.Context, req create.ChatReq) (*create.ChatResp, error) {
@@ -50,5 +51,9 @@ func handle(ctx context.Context, req create.ChatReq) (*create.ChatResp, error) {
 }
 
 func main() {
-	lambda.Start(handle)
+	ctx, err := store.DbCtx()
+	if err != nil {
+		panic(err)
+	}
+	lambda.StartWithContext(ctx, handle)
 }
