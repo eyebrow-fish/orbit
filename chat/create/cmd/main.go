@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
-	"fmt"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/eyebrow-fish/orbit/chat"
 	"github.com/eyebrow-fish/orbit/chat/create"
@@ -11,9 +9,8 @@ import (
 )
 
 func handle(ctx context.Context, req create.ChatReq) (*create.ChatResp, error) {
-	db := ctx.Value("db").(*sql.DB)
-	err := store.ExecUnique(
-		db,
+	db := ctx.Value("db").(*store.Db)
+	err := db.ExecUnique(
 		`
 		insert into Chat(Name)
 		select $1
@@ -26,22 +23,8 @@ func handle(ctx context.Context, req create.ChatReq) (*create.ChatResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	rows, err := db.Query("select * from Chat where Name = $1", req.Name)
-	if err != nil {
-		return nil, err
-	}
-	defer store.Cleanup(rows)
-	if !rows.Next() {
-		return nil, fmt.Errorf("could not insert data")
-	}
-	var (
-		id   int
-		name string
-	)
-	if err = rows.Scan(&id, &name); err != nil {
-		return nil, err
-	}
-	return &create.ChatResp{Chat: chat.Chat{Id: id, Name: name}}, nil
+	resp, err := db.QueryUnique(chat.Chat{}, "select * from Chat where Name = $1", req.Name)
+	return &create.ChatResp{Chat: resp.(chat.Chat)}, nil
 }
 
 func main() {

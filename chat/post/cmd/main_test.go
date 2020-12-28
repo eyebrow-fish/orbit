@@ -1,8 +1,8 @@
 package main
 
 import (
-	"database/sql"
 	"github.com/eyebrow-fish/orbit/chat/post"
+	"github.com/eyebrow-fish/orbit/store"
 	"github.com/eyebrow-fish/orbit/testutil"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -13,7 +13,7 @@ func Test_handle_postNew(t *testing.T) {
 	start := time.Now()
 	ctx, err := testutil.DbCtx(t)
 	assert.Nil(t, err)
-	db := ctx.Value("db").(*sql.DB)
+	db := ctx.Value("db").(*store.Db)
 	_, err = db.Exec("create table Chat(Id serial primary key, Name text not null)")
 	assert.Nil(t, err)
 	_, err = db.Exec(`
@@ -41,7 +41,7 @@ func Test_handle_postNew(t *testing.T) {
 func Test_handle_noChatId(t *testing.T) {
 	ctx, err := testutil.DbCtx(t)
 	assert.Nil(t, err)
-	db := ctx.Value("db").(*sql.DB)
+	db := ctx.Value("db").(*store.Db)
 	_, err = db.Exec("create table chat(id serial primary key, name text not null)")
 	assert.Nil(t, err)
 	_, err = db.Exec(`

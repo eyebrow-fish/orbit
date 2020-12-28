@@ -8,17 +8,21 @@ import (
 	"reflect"
 )
 
+type Db struct {
+	*sql.DB
+}
+
 func DbCtx() (context.Context, error) {
 	root := context.Background()
 	db, err := sql.Open("postgres", "user=user dbname=orbit sslmode=verify-full")
 	if err != nil {
 		return nil, err
 	}
-	return context.WithValue(root, "db", db), nil
+	return context.WithValue(root, "db", &Db{db}), nil
 }
 
-func ExecUnique(db *sql.DB, sql string, args ...interface{}) error {
-	res, err := db.Exec(sql, args...)
+func (s *Db) ExecUnique(sql string, args ...interface{}) error {
+	res, err := s.DB.Exec(sql, args...)
 	if err != nil {
 		return err
 	} else if rows, err := res.RowsAffected(); err != nil {
@@ -29,12 +33,12 @@ func ExecUnique(db *sql.DB, sql string, args ...interface{}) error {
 	return nil
 }
 
-func QueryUniqueAndMap(db *sql.DB, sql string, schema interface{}, args ...interface{}) (interface{}, error) {
-	rows, err := db.Query(sql, args...)
+func (s *Db) QueryUnique(schema interface{}, sql string, args ...interface{}) (interface{}, error) {
+	rows, err := s.DB.Query(sql, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer Cleanup(rows)
+	defer cleanup(rows)
 	if !rows.Next() {
 		return nil, fmt.Errorf("could not find any rows")
 	}
@@ -49,13 +53,13 @@ func QueryUniqueAndMap(db *sql.DB, sql string, schema interface{}, args ...inter
 		return nil, err
 	}
 	resp := reflect.New(reflect.TypeOf(schema)).Elem()
-	for i, _ := range fields {
+	for i := range fields {
 		resp.Field(i).Set(reflect.ValueOf(fields[i]).Elem())
 	}
 	return resp.Interface(), nil
 }
 
-func Cleanup(rows *sql.Rows) {
+func cleanup(rows *sql.Rows) {
 	if err := rows.Close(); err != nil {
 		panic(err)
 	}

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/eyebrow-fish/orbit/chat"
 	"github.com/eyebrow-fish/orbit/chat/post"
@@ -12,9 +11,8 @@ import (
 
 func handle(ctx context.Context, req post.ChatReq) (*post.ChatResp, error) {
 	postTime := time.Now().UnixNano()
-	db := ctx.Value("db").(*sql.DB)
-	err := store.ExecUnique(
-		db,
+	db := ctx.Value("db").(*store.Db)
+	err := db.ExecUnique(
 		`
 		insert into Message(ChatId, Body, Timestamp) 
 		select $1, $2, $3
@@ -32,10 +30,9 @@ func handle(ctx context.Context, req post.ChatReq) (*post.ChatResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	msg, err := store.QueryUniqueAndMap(
-		db,
-		"select * from Message where ChatId = $1 and Timestamp = $2",
+	msg, err := db.QueryUnique(
 		chat.Message{},
+		"select * from Message where ChatId = $1 and Timestamp = $2",
 		req.ChatId,
 		postTime,
 	)

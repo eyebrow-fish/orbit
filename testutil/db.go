@@ -2,6 +2,7 @@ package testutil
 
 import (
 	"context"
+	"github.com/eyebrow-fish/orbit/store"
 	"testing"
 	"zombiezen.com/go/postgrestest"
 )
@@ -17,6 +18,6 @@ func DbCtx(t *testing.T) (context.Context, error) {
 	if err != nil {
 		return nil, err
 	}
-	ctx := context.WithValue(context.Background(), "db", db)
+	ctx := context.WithValue(context.Background(), "db", &store.Db{DB: db})
 	return ctx, nil
 }
