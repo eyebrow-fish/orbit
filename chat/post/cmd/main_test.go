@@ -14,20 +14,20 @@ func Test_handle_postNew(t *testing.T) {
 	ctx, err := testutil.DbCtx(t)
 	assert.Nil(t, err)
 	db := ctx.Value("db").(*sql.DB)
-	_, err = db.Exec("create table chat(id serial primary key, name text not null)")
+	_, err = db.Exec("create table Chat(Id serial primary key, Name text not null)")
 	assert.Nil(t, err)
 	_, err = db.Exec(`
-	create table message(
-		id serial primary key, 
-		chatId int not null,
-		body text not null, 
-		timestamp bigint not null,
-		constraint fkChatId foreign key(chatId)
-			references chat(id)
+	create table Message(
+		Id serial primary key, 
+		ChatId int not null,
+		Body text not null, 
+		Timestamp bigint not null,
+		constraint FkChatId foreign key(ChatId)
+			references Chat(Id)
 	)
 	`)
 	assert.Nil(t, err)
-	_, err = db.Exec("insert into chat values(1, 'chat')")
+	_, err = db.Exec("insert into Chat values(1, 'chat')")
 	assert.Nil(t, err)
 	t.Run("post new", func(t *testing.T) {
 		res, err := handle(ctx, post.ChatReq{ChatId: 1, Body: "hello!"})

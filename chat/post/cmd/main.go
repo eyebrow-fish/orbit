@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/eyebrow-fish/orbit/chat"
 	"github.com/eyebrow-fish/orbit/chat/post"
@@ -17,13 +16,13 @@ func handle(ctx context.Context, req post.ChatReq) (*post.ChatResp, error) {
 	err := store.ExecUnique(
 		db,
 		`
-		insert into message(chatId, body, timestamp) 
+		insert into Message(ChatId, Body, Timestamp) 
 		select $1, $2, $3
 		where not exists (
-			select 1 from message where chatId = $1 and timestamp = $3
+			select 1 from message where ChatId = $1 and Timestamp = $3
 		)
 		and exists (
-			select 1 from chat where id = $1
+			select 1 from Chat where Id = $1
 		)
 		`,
 		req.ChatId,
@@ -33,25 +32,17 @@ func handle(ctx context.Context, req post.ChatReq) (*post.ChatResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	rows, err := db.Query("select * from message where chatId = $1 and timestamp = $2", req.ChatId, postTime)
-	if err != nil {
-		return nil, err
-	}
-	defer store.Cleanup(rows)
-	if !rows.Next() {
-		return nil, fmt.Errorf("could not insert data")
-	}
-	var (
-		id        int
-		chatId    int
-		body      string
-		timestamp int64
+	msg, err := store.QueryUniqueAndMap(
+		db,
+		"select * from Message where ChatId = $1 and Timestamp = $2",
+		chat.Message{},
+		req.ChatId,
+		postTime,
 	)
-	err = rows.Scan(&id, &chatId, &body, &timestamp)
 	if err != nil {
 		return nil, err
 	}
-	return &post.ChatResp{Message: chat.Message{ChatId: chatId, Timestamp: timestamp, Body: body}}, nil
+	return &post.ChatResp{Message: msg.(chat.Message)}, nil
 }
 
 func main() {

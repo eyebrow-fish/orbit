@@ -15,10 +15,10 @@ func handle(ctx context.Context, req create.ChatReq) (*create.ChatResp, error) {
 	err := store.ExecUnique(
 		db,
 		`
-		insert into chat(name)
+		insert into Chat(Name)
 		select $1
 		where not exists (
-			select 1 from chat where name = $1
+			select 1 from Chat where Name = $1
 		)
 		`,
 		req.Name,
@@ -26,7 +26,7 @@ func handle(ctx context.Context, req create.ChatReq) (*create.ChatResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	rows, err := db.Query("select * from chat where name = $1", req.Name)
+	rows, err := db.Query("select * from Chat where Name = $1", req.Name)
 	if err != nil {
 		return nil, err
 	}

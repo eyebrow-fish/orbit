@@ -8,6 +8,6 @@ type Chat struct {
 type Message struct {
 	Id        int
 	ChatId    int
-	Timestamp int64
 	Body      string
+	Timestamp int64
 }
