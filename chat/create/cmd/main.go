@@ -12,7 +12,9 @@ import (
 
 func handle(ctx context.Context, req create.ChatReq) (*create.ChatResp, error) {
 	db := ctx.Value("db").(*sql.DB)
-	res, err := db.Exec(`
+	err := store.ExecUnique(
+		db,
+		`
 			insert into chat(name)
 			select $1
 			where not exists (
@@ -23,20 +25,12 @@ func handle(ctx context.Context, req create.ChatReq) (*create.ChatResp, error) {
 	)
 	if err != nil {
 		return nil, err
-	} else if rows, err := res.RowsAffected(); err != nil {
-		return nil, err
-	} else if rows < 1 {
-		return nil, fmt.Errorf("could not create new chat")
 	}
 	rows, err := db.Query("select * from chat where name = $1", req.Name)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		if err = rows.Close(); err != nil {
-			panic(err)
-		}
-	}()
+	defer store.Cleanup(rows)
 	if !rows.Next() {
 		return nil, fmt.Errorf("could not insert data")
 	}

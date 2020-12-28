@@ -6,8 +6,8 @@ type Chat struct {
 }
 
 type Message struct {
+	Id        int
 	ChatId    int
-	AuthorId  int
 	Timestamp int64
 	Body      string
 }
