@@ -17,14 +17,14 @@ func Test_handle_postNew(t *testing.T) {
 	_, err = db.Exec("create table chat(id serial primary key, name text not null)")
 	assert.Nil(t, err)
 	_, err = db.Exec(`
-		create table message(
-    		id serial primary key, 
-    		chatId int not null,
-    		body text not null, 
-    		timestamp bigint not null,
-    		constraint fkChatId foreign key(chatId)
-		    	references chat(id)
-		)
+	create table message(
+		id serial primary key, 
+		chatId int not null,
+		body text not null, 
+		timestamp bigint not null,
+		constraint fkChatId foreign key(chatId)
+			references chat(id)
+	)
 	`)
 	assert.Nil(t, err)
 	_, err = db.Exec("insert into chat values(1, 'chat')")

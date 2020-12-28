@@ -17,11 +17,11 @@ func handle(ctx context.Context, req post.ChatReq) (*post.ChatResp, error) {
 	err := store.ExecUnique(
 		db,
 		`
-			insert into message(chatId, body, timestamp) 
-			select $1, $2, $3
-			where not exists (
-			    select 1 from message where chatId = $1 and timestamp = $3
-			)
+		insert into message(chatId, body, timestamp) 
+		select $1, $2, $3
+		where not exists (
+			select 1 from message where chatId = $1 and timestamp = $3
+		)
 		`,
 		req.ChatId,
 		req.Body,
