@@ -37,3 +37,26 @@ func Test_handle_postNew(t *testing.T) {
 		assert.Equal(t, "hello!", res.Message.Body)
 	})
 }
+
+func Test_handle_noChatId(t *testing.T) {
+	ctx, err := testutil.DbCtx(t)
+	assert.Nil(t, err)
+	db := ctx.Value("db").(*sql.DB)
+	_, err = db.Exec("create table chat(id serial primary key, name text not null)")
+	assert.Nil(t, err)
+	_, err = db.Exec(`
+	create table message(
+		id serial primary key, 
+		chatId int not null,
+		body text not null, 
+		timestamp bigint not null,
+		constraint fkChatId foreign key(chatId)
+			references chat(id)
+	)
+	`)
+	assert.Nil(t, err)
+	t.Run("post new", func(t *testing.T) {
+		_, err := handle(ctx, post.ChatReq{ChatId: 1, Body: "failure!"})
+		assert.NotNil(t, err)
+	})
+}
