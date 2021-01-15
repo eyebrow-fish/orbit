@@ -1,7 +1,6 @@
-package main
+package post
 
 import (
-	"github.com/eyebrow-fish/orbit/chat/post"
 	"github.com/eyebrow-fish/orbit/store"
 	"github.com/eyebrow-fish/orbit/testutil"
 	"github.com/stretchr/testify/assert"
@@ -30,7 +29,7 @@ func Test_handle_postNew(t *testing.T) {
 	_, err = db.Exec("insert into Chat values(1, 'chat')")
 	assert.Nil(t, err)
 	t.Run("post new", func(t *testing.T) {
-		res, err := handle(ctx, post.ChatReq{ChatId: 1, Body: "hello!"})
+		res, err := Handle(ctx, ChatReq{ChatId: 1, Body: "hello!"})
 		assert.Nil(t, err)
 		assert.LessOrEqual(t, start.UnixNano(), res.Message.Timestamp)
 		assert.Equal(t, 1, res.Message.ChatId)
@@ -56,7 +55,7 @@ func Test_handle_noChatId(t *testing.T) {
 	`)
 	assert.Nil(t, err)
 	t.Run("post new", func(t *testing.T) {
-		_, err := handle(ctx, post.ChatReq{ChatId: 1, Body: "failure!"})
+		_, err := Handle(ctx, ChatReq{ChatId: 1, Body: "failure!"})
 		assert.NotNil(t, err)
 	})
 }
