@@ -59,6 +59,36 @@ func (s *Db) QueryUnique(schema interface{}, sql string, args ...interface{}) (i
 	return resp.Interface(), nil
 }
 
+func (s *Db) QueryMany(schema interface{}, sql string, args ...interface{}) ([]interface{}, error) {
+	rows, err := s.DB.Query(sql, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer cleanup(rows)
+	if !rows.Next() {
+		return nil, fmt.Errorf("could not find any rows")
+	}
+	value := reflect.ValueOf(schema)
+	var fields []interface{}
+	for i := 0; i < value.NumField(); i++ {
+		field := value.Field(i).Interface()
+		fields = appendConverted(fields, field)
+	}
+	var items []interface{}
+	for rows.Next() {
+		err = rows.Scan(fields...)
+		if err != nil {
+			return nil, err
+		}
+		resp := reflect.New(reflect.TypeOf(schema)).Elem()
+		for i := range fields {
+			resp.Field(i).Set(reflect.ValueOf(fields[i]).Elem())
+		}
+		items = append(items, resp.Interface())
+	}
+	return items, nil
+}
+
 func cleanup(rows *sql.Rows) {
 	if err := rows.Close(); err != nil {
 		panic(err)

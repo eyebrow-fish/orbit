@@ -30,6 +30,6 @@ func Test_handle_createDuplicate(t *testing.T) {
 		_, err = Handle(dbCtx, ChatReq{Name: "dup"})
 		assert.Nil(t, err)
 		_, err = Handle(dbCtx, ChatReq{Name: "dup"})
-		assert.NotNil(t, err)
+		assert.Nil(t, err)
 	})
 }
