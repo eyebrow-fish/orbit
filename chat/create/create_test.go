@@ -8,28 +8,21 @@ import (
 	"testing"
 )
 
-func Test_handle_createNew(t *testing.T) {
-	dbCtx, err := testutil.DbCtx(t)
-	assert.Nil(t, err)
+func TestHandle_createNew(t *testing.T) {
+	dbCtx, _ := testutil.DbCtx(t)
 	db := dbCtx.Value("db").(*store.Db)
-	_, err = db.Exec("create table chat(id serial primary key, name text not null)")
+	_, _ = db.Exec("create table chat(id serial primary key, name text not null)")
+	resp, err := Handle(dbCtx, ChatReq{Name: "new"})
 	assert.Nil(t, err)
-	t.Run("create new chat", func(t *testing.T) {
-		resp, err := Handle(dbCtx, ChatReq{Name: "new"})
-		assert.Nil(t, err)
-		assert.Equal(t, chat.Chat{Id: 1, Name: "new"}, resp.Chat)
-	})
+	assert.Equal(t, chat.Chat{Id: 1, Name: "new"}, resp.Chat)
 }
 
-func Test_handle_createDuplicate(t *testing.T) {
-	dbCtx, err := testutil.DbCtx(t)
-	assert.Nil(t, err)
+func TestHandle_createDuplicate(t *testing.T) {
+	dbCtx, _ := testutil.DbCtx(t)
 	db := dbCtx.Value("db").(*store.Db)
-	_, err = db.Exec("create table chat(id serial primary key, name text not null)")
-	t.Run("create duplicate", func(t *testing.T) {
-		_, err = Handle(dbCtx, ChatReq{Name: "dup"})
-		assert.Nil(t, err)
-		_, err = Handle(dbCtx, ChatReq{Name: "dup"})
-		assert.Nil(t, err)
-	})
+	_, _ = db.Exec("create table chat(id serial primary key, name text not null)")
+	_, err := Handle(dbCtx, ChatReq{Name: "dup"})
+	assert.Nil(t, err)
+	_, err = Handle(dbCtx, ChatReq{Name: "dup"})
+	assert.Nil(t, err)
 }

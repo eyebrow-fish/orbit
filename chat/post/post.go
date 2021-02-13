@@ -24,7 +24,7 @@ func Handle(ctx context.Context, req ChatReq) (*ChatResp, error) {
 		insert into Message(ChatId, Body, Timestamp) 
 		select $1, $2, $3
 		where not exists (
-			select 1 from message where ChatId = $1 and Timestamp = $3
+			select 1 from message where ChatId = $1 and Body = $2 and Timestamp = $3
 		)
 		and exists (
 			select 1 from Chat where Id = $1

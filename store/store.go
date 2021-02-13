@@ -65,9 +65,6 @@ func (s *Db) QueryMany(schema interface{}, sql string, args ...interface{}) ([]i
 		return nil, err
 	}
 	defer cleanup(rows)
-	if !rows.Next() {
-		return nil, fmt.Errorf("could not find any rows")
-	}
 	value := reflect.ValueOf(schema)
 	var fields []interface{}
 	for i := 0; i < value.NumField(); i++ {
