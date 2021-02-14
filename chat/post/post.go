@@ -43,8 +43,5 @@ func Handle(ctx context.Context, req ChatReq) (*ChatResp, error) {
 		req.ChatId,
 		postTime,
 	)
-	if err != nil {
-		return nil, err
-	}
-	return &ChatResp{Message: msg.(chat.Message)}, nil
+	return &ChatResp{Message: msg.(chat.Message)}, err
 }

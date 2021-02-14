@@ -34,19 +34,13 @@ func (s *Db) ExecUnique(sql string, args ...interface{}) error {
 }
 
 func (s *Db) QueryUnique(schema interface{}, sql string, args ...interface{}) (interface{}, error) {
-	rows, err := s.DB.Query(sql, args...)
+	rows, fields, err := s.queryRowsAndFields(schema, sql, args)
 	if err != nil {
 		return nil, err
 	}
 	defer cleanup(rows)
 	if !rows.Next() {
 		return nil, fmt.Errorf("could not find any rows")
-	}
-	value := reflect.ValueOf(schema)
-	var fields []interface{}
-	for i := 0; i < value.NumField(); i++ {
-		field := value.Field(i).Interface()
-		fields = appendConverted(fields, field)
 	}
 	err = rows.Scan(fields...)
 	if err != nil {
@@ -60,17 +54,11 @@ func (s *Db) QueryUnique(schema interface{}, sql string, args ...interface{}) (i
 }
 
 func (s *Db) QueryMany(schema interface{}, sql string, args ...interface{}) ([]interface{}, error) {
-	rows, err := s.DB.Query(sql, args...)
+	rows, fields, err := s.queryRowsAndFields(schema, sql, args)
 	if err != nil {
 		return nil, err
 	}
 	defer cleanup(rows)
-	value := reflect.ValueOf(schema)
-	var fields []interface{}
-	for i := 0; i < value.NumField(); i++ {
-		field := value.Field(i).Interface()
-		fields = appendConverted(fields, field)
-	}
 	var items []interface{}
 	for rows.Next() {
 		err = rows.Scan(fields...)
@@ -84,6 +72,20 @@ func (s *Db) QueryMany(schema interface{}, sql string, args ...interface{}) ([]i
 		items = append(items, resp.Interface())
 	}
 	return items, nil
+}
+
+func (s *Db) queryRowsAndFields(schema interface{}, sql string, args []interface{}) (*sql.Rows, []interface{}, error) {
+	rows, err := s.DB.Query(sql, args...)
+	if err != nil {
+		return nil, nil, err
+	}
+	value := reflect.ValueOf(schema)
+	var fields []interface{}
+	for i := 0; i < value.NumField(); i++ {
+		field := value.Field(i).Interface()
+		fields = appendConverted(fields, field)
+	}
+	return rows, fields, err
 }
 
 func cleanup(rows *sql.Rows) {

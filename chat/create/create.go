@@ -27,5 +27,5 @@ func Handle(ctx context.Context, req ChatReq) (*ChatResp, error) {
 		return nil, err
 	}
 	resp, err := db.QueryUnique(chat.Chat{}, "select * from Chat where Name = $1", req.Name)
-	return &ChatResp{Chat: resp.(chat.Chat)}, nil
+	return &ChatResp{Chat: resp.(chat.Chat)}, err
 }
