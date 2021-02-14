@@ -8,8 +8,8 @@ import (
 )
 
 type ChatReq struct {
-	ChatId   int
-	Body     string
+	ChatId int
+	Body   string
 }
 
 type ChatResp struct {
@@ -43,5 +43,5 @@ func Handle(ctx context.Context, req ChatReq) (*ChatResp, error) {
 		req.ChatId,
 		postTime,
 	)
-	return &ChatResp{Message: msg.(chat.Message)}, err
+	return &ChatResp{msg.(chat.Message)}, err
 }

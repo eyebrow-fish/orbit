@@ -18,7 +18,7 @@ func Handle(ctx context.Context, req ChatReq) (*ChatResp, error) {
 	db := ctx.Value("db").(*store.Db)
 	resp, err := db.QueryMany(
 		chat.Message{},
-		`select * from Message where ChatId = $1`,
+		"select * from Message where ChatId = $1",
 		req.ChatId,
 	)
 	if err != nil {

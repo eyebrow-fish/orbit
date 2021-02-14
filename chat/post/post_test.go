@@ -25,7 +25,7 @@ func TestHandle_postNew(t *testing.T) {
 	`)
 	_, err := db.Exec("insert into Chat values(1, 'chat')")
 	assert.Nil(t, err)
-	res, err := Handle(ctx, ChatReq{ChatId: 1, Body: "hello!"})
+	res, err := Handle(ctx, ChatReq{1, "hello!"})
 	assert.Nil(t, err)
 	assert.LessOrEqual(t, start.UnixNano(), res.Message.Timestamp)
 	assert.Equal(t, 1, res.Message.ChatId)
@@ -46,6 +46,6 @@ func TestHandle_noChatId(t *testing.T) {
 			references chat(id)
 	)
 	`)
-	_, err := Handle(ctx, ChatReq{ChatId: 1, Body: "failure!"})
+	_, err := Handle(ctx, ChatReq{1, "failure!"})
 	assert.NotNil(t, err)
 }
