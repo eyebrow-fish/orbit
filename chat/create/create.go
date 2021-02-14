@@ -16,13 +16,7 @@ type ChatResp struct {
 
 func Handle(ctx context.Context, req ChatReq) (*ChatResp, error) {
 	db := ctx.Value("db").(*store.Db)
-	err := db.ExecUnique(
-		`
-		insert into Chat(Name)
-		values($1)
-		`,
-		req.Name,
-	)
+	err := db.ExecUnique("insert into Chat(Name) values($1)", req.Name)
 	if err != nil {
 		return nil, err
 	}
